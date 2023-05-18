@@ -1,0 +1,37 @@
+---
+#indien de gebruiker geen sudo rechten mag hebben groep aanpassen, become_user in #
+- name: Add new user with admin rights
+  user:
+    name: "{{ new_user }}"
+    password: "{{ new_user_password | password_hash('sha512') }}"
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+  become: True
+  become_user: root
+  register: new_user_created
+
+#Log user creation
+- name: Log new user creation activity
+  lineinfile:
+    path: /var/log/ansible-user-creation.log
+    line: "New user '{{ new_user }}' with admin rights was created by Ansible at {{ ansible_date_time.iso8601 }}."
+    create: yes
+
+#Indien gebruiker passwoord moet ingeven alles in #
+- name: Enable passwordless sudo for new user
+  lineinfile:
+    dest: /etc/sudoers.d/ansible-user
+    line: "{{ new_user }} ALL=(ALL) NOPASSWD: ALL"
+    create: yes
+    mode: 0440
+  become: true
+  become_user: root
+
+#enkel nodig voor ssh indien niet nodig #
+- name: Set public key for new user
+  authorized_key:
+    user: "{{ new_user }}"
+    key: "{{ lookup('file', '/home/mano/.ssh/id_rsa.pub') }}"
+    state: present
+  when: new_user_created.changed

@@ -1,0 +1,35 @@
+---
+# tasks file for UserCreation
+
+
+- name: Create requested group
+  group:
+    name: "{{ group }}"
+
+#add to group  
+- name: Add new user to group 
+  user:
+    name: "{{ new_user }}"
+    password: "{{ new_user_password | password_hash('sha512') }}"
+    shell: /bin/bash
+    groups: "{{ group }}"
+    append: yes
+  become: True
+  become_user: root
+  register: new_user_created
+
+#Log user creation
+- name: Log new user creation activity
+  lineinfile:
+    path: /var/log/ansible-user-creation.log
+    line: "New user '{{ new_user }}' was created by Ansible at {{ ansible_date_time.iso8601 }}."
+    create: yes
+
+
+#enkel nodig voor ssh indien niet nodig #
+- name: Set public key for new user
+  authorized_key:
+    user: "{{ new_user }}"
+    key: "{{ lookup('file', '/home/mano/.ssh/id_rsa.pub') }}"
+    state: present
+  when: new_user_created.changed

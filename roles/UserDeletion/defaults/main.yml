@@ -1,0 +1,5 @@
+---
+# defaults file for UserDeletion
+users_to_delete:
+  - name: test
+    group: test

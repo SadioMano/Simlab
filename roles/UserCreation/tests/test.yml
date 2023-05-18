@@ -1,0 +1,6 @@
+---
+- hosts: piarno
+  remote_user: ansible
+  become: True
+  roles:
+    - UserCreation

@@ -1,0 +1,16 @@
+---
+# tasks file for UserDeletion
+
+- name: Remove users from their groups
+  user:
+    name: "{{ item.name }}"
+    state: present
+    groups: ""
+  with_items: "{{ users_to_delete }}"
+
+- name: Remove users
+  user:
+    name: "{{ item.name }}"
+    state: absent
+  with_items: "{{ users_to_delete }}"
+

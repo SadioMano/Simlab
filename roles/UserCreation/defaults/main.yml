@@ -1,0 +1,5 @@
+---
+# defaults file for UserCreation
+new_user: test
+new_user_password: Test123
+group: test
